@@ -1,4 +1,3 @@
-from re import T
 import pygame
 from setting import *
 from tile import Tile
@@ -24,7 +23,7 @@ class Level:
                 x = col_index * TILESIZE
                 y = row_index * TILESIZE
                 if col == 'x':
-                    Tile((x,y),[self.visible_object])
+                    Tile((x,y),[self.visible_object,self.obstacles_object])
                 if col == 'p':
                     self.player = Player((x,y),[self.visible_object],self.obstacles_object)
         
