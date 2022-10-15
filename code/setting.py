@@ -26,3 +26,8 @@ WORLD_MAP = [
 ['x',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','x'],
 ['x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x'],
 ]
+
+#snake
+enemy_date = {
+    'snake' : {'health':100,'damage':1,'attack_type':'stalk','speed':8,'attack_player':200,'attack_apple':1000,'notice_radius':100}
+}
