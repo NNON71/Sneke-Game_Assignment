@@ -1,20 +1,20 @@
-from tkinter import HORIZONTAL, W
-from turtle import speed
-from typing import TYPE_CHECKING
 import pygame
 from setting import *
 
 class Player(pygame.sprite.Sprite):
     def __init__(self,pos,group,obstacles_object):
         super().__init__(group)
-        self.image = pygame.image.load('graphic/player/test.png').convert_alpha()
-        self.rect = self.image.get_rect(topleft = pos)
+        self.image = pygame.image.load('graphic/player/testad.png').convert_alpha()
+        self.rect = self.image.get_rect(center = pos)
         self.hitbox = self.rect.inflate(0,0)
         
         self.direction = pygame.Vector2()
         self.speed = 10
-        self.dash_x = 0
-        self.dash_y = 0
+        
+        self.dashing = False
+        self.dash_time = None
+        self.dash_cooldown = 1000
+        self.dash = pygame.Vector2()
         
         self.obstacles_object = obstacles_object
         
@@ -37,27 +37,33 @@ class Player(pygame.sprite.Sprite):
         else :
             self.direction.x = 0 
         
-        if key[pygame.K_SPACE]:
-            if self.direction.x == -1 and self.hitbox.x > 64:
-                self.dash_x = -25
-            elif self.direction.x == 1 and self.hitbox.x < 1577  :
-                self.dash_x = 25
+        if key[pygame.K_SPACE] and self.dashing == False:
+            
+            self.dashing = True
+            self.dash_time = pygame.time.get_ticks()
+            
+            if self.direction.x == -1 and self.hitbox.x > 80:
+                self.dash.x = -100
+            elif self.direction.x == 1 and self.hitbox.x < 1170 :
+                self.dash.x = 100
+
                          
-            if self.direction.y == -1 and self.hitbox.y > 64:
-                self.dash_y = -25
-            elif self.direction.y == 1 and self.hitbox.y < 1577:
-                self.dash_y = 25
+            if self.direction.y == -1 and self.hitbox.y > 80:
+                self.dash.y = -100
+            elif self.direction.y == 1 and self.hitbox.y < 1170:
+                self.dash.y = 100
+
         else :
-                self.dash_y = 0 
-                self.dash_x = 0 
+                self.dash.y = 0 
+                self.dash.x = 0 
            
-    def move(self,speed,dash_x,dash_y):
+    def move(self,speed,dash):
         if self.direction.magnitude() != 0:
             self.direction = self.direction.normalize()
             
-        self.hitbox.x += self.direction.x * speed + dash_x
+        self.hitbox.x += self.direction.x * speed + dash.x
         self.conllision('horizontal')
-        self.hitbox.y += self.direction.y * speed + dash_y
+        self.hitbox.y += self.direction.y * speed + dash.y
         self.conllision('vertical')
         self.rect.center = self.hitbox.center
         #self.rect.center += self.direction * speed
@@ -77,7 +83,16 @@ class Player(pygame.sprite.Sprite):
                     if self.direction.y > 0: # moving up
                         self.hitbox.bottom = object.hitbox.top
                     if self.direction.y < 0: # moving down
-                        self.hitbox.top = object.hitbox.bottom    
+                        self.hitbox.top = object.hitbox.bottom   
+                        
+    def cooldown(self):
+        current_time = pygame.time.get_ticks()
+
+        if self.dashing == True:
+            if current_time - self.dash_time >= self.dash_cooldown:
+                self.dashing = False
+                         
     def update(self):
         self.input()
-        self.move(self.speed,self.dash_x,self.dash_y)
+        self.cooldown()
+        self.move(self.speed,self.dash)
