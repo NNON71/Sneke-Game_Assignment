@@ -3,6 +3,7 @@ from setting import *
 from tile import Tile
 from player import Player
 from debug import debug
+from enemy import Enemy
 
 class Level:
     def __init__(self):
@@ -29,13 +30,18 @@ class Level:
                     Tile((x,y),[self.visible_object,self.obstacles_object])
                 if col == 'p':
                     self.player = Player((x,y),[self.visible_object],self.obstacles_object)
+                if col == 's':
+                    Enemy('snake_head',(x,y),[self.visible_object],self.obstacles_object)
+                
         
     def run(self):
         #self.create_apple.draw_apple()
-        self.visible_object.update()
         self.visible_object.custom_draw(self.player)
+        self.visible_object.update()
+        self.visible_object.enemy_update(self.player)
+    
         #debug(self.player.direction)
-        debug(self.player.rect,10,10)
+        #debug(self.player.rect,10,10)
         #debug(self.player.dash)
         
 # class Apple:
@@ -100,3 +106,8 @@ class YsortcameraGroup(pygame.sprite.Group):
             self.display_surface.blit(sprite.image,offset_pos)
             
         #pygame.draw.rect(self.display_surface,'red',self.camera_rect,5)
+        
+    def enemy_update(self,player):
+        enemy_sprite = [sprite for sprite in self.sprites() if hasattr(sprite,'sprite_type') and sprite.sprite_type == 'enemy']
+        for enemy in enemy_sprite:
+            enemy.enemy_update(player)

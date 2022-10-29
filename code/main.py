@@ -17,8 +17,6 @@ class Game:
         
         self.paused  = False
         
-        
-        
     def run(self):
         while True:
             for event in pygame.event.get():
