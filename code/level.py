@@ -1,22 +1,36 @@
-import pygame
+import pygame,random
 from setting import *
 from tile import Tile
 from player import Player
+#from apple import Apple
 from debug import debug
 from enemy import Enemy
+from ui import UI
 
 class Level:
     def __init__(self):
         
+        self.paused = False
         #get the display surface
         self.display_surface = pygame.display.get_surface()
+        #self.randomize()
         
         #object
         self.visible_object = YsortcameraGroup()
         self.obstacles_object = pygame.sprite.Group()
         
+        #attack
+        self.current_attack = None 
+        self.attack_sprites = pygame.sprite.Group()
+        self.attackale_sprites = pygame.sprite.Group()
+        
         #object setup
         self.create_map()
+        
+        #user interface
+        self.ui = UI()
+        
+        self.gameover = pygame.font.SysFont(UI_FONT,100)
         
         #spawn apple
         #self.create_apple = Apple() 
@@ -29,35 +43,66 @@ class Level:
                 if col == 'x':
                     Tile((x,y),[self.visible_object,self.obstacles_object])
                 if col == 'p':
-                    self.player = Player((x,y),[self.visible_object],self.obstacles_object)
+                        self.player = Player((x,y),[self.visible_object],self.obstacles_object,5)
                 if col == 's':
-                    Enemy('snake_head',(x,y),[self.visible_object],self.obstacles_object)
+                    Enemy('snake_head',(x,y),[self.visible_object,self.attackale_sprites],self.obstacles_object,self.damage_player)
                 
+    # def create_attack(self):
+    #     self.
         
     def run(self):
         #self.create_apple.draw_apple()
         self.visible_object.custom_draw(self.player)
-        self.visible_object.update()
-        self.visible_object.enemy_update(self.player)
-    
+        self.ui.display(self.player)
+        if self.paused or self.player.game_over_stats :
+            print(self.ui.score)
+            #self.img = self.font.render("Game Over",True,'Black')
+            #self.text_gameover = self.font.render("GAME OVER",1,'white')
+            self.display_surface.fill('black')
+            self.ui.game_over_screen()
+            #self.display_surface.blit(self.img,(500,500))
+            #self.display_surface.blit(self.text_gameover,(280,300))
+        else:
+            self.visible_object.enemy_update(self.player)
+            self.visible_object.update()
+            self.ui.show_score()
+            self.player.death_check()
         #debug(self.player.direction)
         #debug(self.player.rect,10,10)
         #debug(self.player.dash)
-        
-# class Apple:
     
+    def damage_player(self,amount,attack_type):
+        if self.player.vulnerable:
+            self.player.health -= amount
+            self.player = Player((random.uniform(3,15)*64,random.uniform(3,15)*64),[self.visible_object],self.obstacles_object,self.player.health)
+            self.player.vulnerable = False
+            self.player.hurt_time = pygame.time.get_ticks()
+           
+                    
+    def game_pause(self):
+        self.paused = not self.paused
+       
+     
+            
+    # def randomize(self):
+    #     self.apple.x = random.randint(96,1184)
+    #     self.apple.y = random.randint(96,624)
+    #     Apple('apple',(self.apple.x,self.apple.y),True)
+    
+# class Apple:
 # 	def __init__(self):
 # 		self.randomize()
-
+  
 # 	def draw_apple(self):
 # 		fruit_rect = pygame.Rect(int(self.pos.x * TILESIZE),int(self.pos.y * TILESIZE),32,32)
-# 		pygame.draw.rect(pygame.display.set_mode((WIDTH,HEIGTH)),(126,166,114),fruit_rect)
+# 		pygame.draw.rect(pygame.display.get_surface(),'red',fruit_rect)
 # 		#pygame.draw.rect(screen,(126,166,114),fruit_rect)
 
 # 	def randomize(self):
-# 		self.x = random.randint(1,16)
-# 		self.y = random.randint(1,16)
-# 		self.pos = Vector2(self.x,self.y)
+# 		self.x = random.randint(4,12)
+# 		self.y = random.randint(4,12)
+# 		self.pos = pygame.math.Vector2(self.x,self.y)
+        
         
 class YsortcameraGroup(pygame.sprite.Group):
     def __init__(self) :
