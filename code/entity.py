@@ -32,8 +32,8 @@ class Entity(pygame.sprite.Sprite):
                     if self.direction.y > 0: # moving up
                         self.hitbox.bottom = object.hitbox.top
                     if self.direction.y < 0: # moving down
-                        self.hitbox.top = object.hitbox.bottom  
-                        
+                        self.hitbox.top = object.hitbox.bottom
+                     
     def wave_value(self):
         value = sin(pygame.time.get_ticks())
         if value >= 0:

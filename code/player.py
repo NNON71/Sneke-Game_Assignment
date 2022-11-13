@@ -1,15 +1,17 @@
 import pygame
 from entity import Entity
+from particle import Trail
 from setting import *
 
 class Player(Entity):
-    def __init__(self,pos,group,obstacles_object,HP):
+    def __init__(self,pos,group,obstacles_object,trail_group,HP):
         super().__init__(group)
         
         self.display_surface = pygame.display.get_surface()
         self.font = pygame.font.Font(UI_FONT,100)
         
         self.image = pygame.image.load('graphic/player/testad.png').convert_alpha()
+        #self.rect = self.image.fill('black')
         self.rect = self.image.get_rect(center = pos)
         self.hitbox = self.rect.inflate(0,0)
         
@@ -20,7 +22,8 @@ class Player(Entity):
         self.game_over_stats = False
          
         self.obstacles_object = obstacles_object
-        
+        self.trail_group = trail_group
+                
         #stats
         self.stats = {'health':5,'speed':5}
         self.health = HP#self.stats['health']
@@ -49,7 +52,10 @@ class Player(Entity):
             self.direction.x = 0 
         
         if key[pygame.K_SPACE] and self.dashing == False:
-            
+            if self.health > 1 :
+                self.health -= 1
+            else:
+                self.health == 1
             self.dashing = True
             self.dash_time = pygame.time.get_ticks()
             
@@ -72,12 +78,18 @@ class Player(Entity):
         current_time = pygame.time.get_ticks()
 
         if self.dashing == True:
+            t =Trail(self.rect.center,(200,200,200))
+            self.trail_group.add(t)
             if current_time - self.dash_time >= self.dash_cooldown:
                 self.dashing = False
                 
         if not self.vulnerable:
+            alpha = self.wave_value()
+            self.image.set_alpha(alpha)
             if current_time - self.hurt_time >= self.invulnerability_duration:
                 self.vulnerable = True
+        else :
+            self.image.set_alpha(255)
                 
     def death_check(self):
         if self.health <= 0:

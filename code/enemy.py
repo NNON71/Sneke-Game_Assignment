@@ -1,10 +1,11 @@
 import pygame,random
 from debug import debug
+from particle import SnakeTail
 from setting import *
 from entity import Entity
 
 class Enemy(Entity):
-    def __init__(self,monster_name,pos,groups,obstacles_object,damage_player):
+    def __init__(self,monster_name,pos,groups,obstacles_object,damage_player,damage_apple,tail_group):
 
         #general setup
         super().__init__(groups)
@@ -12,7 +13,7 @@ class Enemy(Entity):
         
         #graphic setup
         # self.import_grapgics(monster_name)
-        self.image = pygame.image.load('graphic/snake.png').convert_alpha()
+        self.image = pygame.image.load('graphic/snakeaa.png').convert_alpha()
         self.status = 'idle'
         
         #move
@@ -30,28 +31,39 @@ class Enemy(Entity):
         self.attack_player = monster_info['attack_player']
         self.attack_apple = monster_info['attack_apple']
         self.notice_radius = monster_info['notice_radius']    
+        self.apple_radius = monster_info['apple_radius']
         
         #player interact
         self.can_attack = True
         self.attack_time = None
         self.attack_cooldown = 500
         self.damage_player = damage_player
+        self.damage_apple = damage_apple
         
         #invicibility timer
         self.vulnerable = True
         self.hit_time = None
         self.invicibility_duration = 300
+        #snake eatapple
+        self.snake_trail_group = tail_group
+        self.long = 2
+        self.eatapple = False
+        self.cdapple = None
+        self.snake_range = 200
         
     # def import_grachic(self,name):
     #     self.animation =
     
-    def get_player_distance_direction(self,player):
+    def get_player_distance_direction(self,player,apple):
         enemy_vec = pygame.math.Vector2(self.rect.center)
+        apple_vec = pygame.math.Vector2(apple.rect.center)
         player_vec = pygame.math.Vector2(player.rect.center)
         distance = (player_vec - enemy_vec).magnitude()
+        distance_apple = (apple_vec-enemy_vec).magnitude()
         y_diff = player_vec[1]-enemy_vec[1]
         x_diff = player_vec[0]-enemy_vec[0]
         direction = pygame.math.Vector2()
+
         
         if distance > 0:
             #direction = (player_vec - enemy_vec).normalize() #ทำเป็นเวกเตอร์หนึ่งหน่วย ทีทิศทาง
@@ -68,32 +80,51 @@ class Enemy(Entity):
                 elif y_diff == -1 or y_diff == 2 or y_diff == 1 or y_diff == -2 or y_diff == 0:
                     direction.y = 0
         
+        if distance_apple > 0:
+            direction_apple = (apple_vec-enemy_vec).normalize()
+        
         else:
             direction = pygame.math.Vector2()
 
-        return (distance,direction)
+        return (distance,direction,distance_apple,direction_apple)
     
-    def get_status(self,player):
-        distance = self.get_player_distance_direction(player)[0]
+    def get_status(self,player,apple):
+        distance = self.get_player_distance_direction(player,apple)[0]
+        distance_apple = self.get_player_distance_direction(player,apple)[2]
         
         if distance <= self.attack_player and self.can_attack:
             self.status = 'attack_player'
+            
+        elif distance_apple <= self.attack_apple :
+            self.status = 'attack_apple'
        
-        elif distance <= self.notice_radius:
+        elif distance < distance_apple :#distance <= self.notice_radius and  distance_apple <= distance:
             self.status = 'move'
+            
+        elif distance > distance_apple :#distance_apple <= self.apple_radius :
+            self.status = 'move_to_apple'    
+        
         else :
             self.status = 'idle'
     
-    def actions(self,player):
-        if self.status == 'attack_player':
+    def actions(self,player,apple):
+        if self.status == 'attack_player' :
             #print('attack')
-            player.kill()
             self.attack_time = pygame.time.get_ticks()
-            self.damage_player(self.damage,self.attack_type)
+            self.damage_player(self.damage)
             self.can_attack = False
+        
+        elif self.status == 'attack_apple':
+            #print('attack apple')
+            apple.kill()
+            self.damage_apple(self.damage)
             
         elif self.status == 'move':
-            self.direction = self.get_player_distance_direction(player)[1]
+            self.direction = self.get_player_distance_direction(player,apple)[1]
+            
+        elif self.status == 'move_to_apple':
+            self.direction = self.get_player_distance_direction(player,apple)[3]
+            
         else:
             self.direction = pygame.math.Vector2()
     
@@ -101,14 +132,24 @@ class Enemy(Entity):
         if not self.can_attack:
             current_time = pygame.time.get_ticks()
             if current_time - self.attack_time >= self.attack_cooldown:
-                self.can_attack = True 
+                self.can_attack = True
+        if self.eatapple == True:
+            if self.long < 0:
+                self.long = 0.1
+            t =SnakeTail(self.rect.center,self.long)
+            self.snake_trail_group.add(t)
+            current_time = pygame.time.get_ticks()
+            if current_time - self.cdapple >= self.snake_range:
+                self.can_attack = True
+                #self.snake_trail_group.empty()
        
     def update(self):
         # self.input()
         self.move(self.speed,self.dash)
         self.cooldown()
-
-
-    def enemy_update(self,player):
-        self.get_status(player)
-        self.actions(player)
+        #print(self.status)
+         
+    def enemy_update(self,player,apple):
+        self.get_status(player,apple)
+        self.actions(player,apple)
+        
