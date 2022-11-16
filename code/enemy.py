@@ -13,7 +13,7 @@ class Enemy(Entity):
         
         #graphic setup
         # self.import_grapgics(monster_name)
-        self.image = pygame.image.load('graphic/snakeaa.png').convert_alpha()
+        self.image = pygame.image.load('graphic/snakeaaaa.png').convert_alpha()
         self.status = 'idle'
         
         #move
@@ -27,7 +27,6 @@ class Enemy(Entity):
         self.health = monster_info['health']
         self.damage = monster_info['damage']
         self.speed = monster_info['speed']
-        self.attack_type = monster_info['attack_type']
         self.attack_player = monster_info['attack_player']
         self.attack_apple = monster_info['attack_apple']
         self.notice_radius = monster_info['notice_radius']    
@@ -64,27 +63,28 @@ class Enemy(Entity):
         x_diff = player_vec[0]-enemy_vec[0]
         direction = pygame.math.Vector2()
 
+        #print(str("x ")+str(x_diff)+str(" y ")+str(y_diff))
         
         if distance > 0:
             #direction = (player_vec - enemy_vec).normalize() #ทำเป็นเวกเตอร์หนึ่งหน่วย ทีทิศทาง
-            if y_diff == -1 or y_diff == 2 or y_diff == 1 or y_diff == -2 or y_diff == 0:
+            if y_diff == -1 or y_diff == 2 or y_diff == 1 or y_diff == -2 or y_diff == 0 or y_diff == -3 or y_diff == 3:
                 if x_diff <= 0 :
                     direction.x = -1
                 elif x_diff >= 0 :
                     direction.x = 1
             else:
-                if y_diff < 0 and y_diff != -1 and y_diff != 2 and y_diff != 1 and y_diff != -2:
+                if y_diff < 0 and y_diff != -1 and y_diff != 2 and y_diff != 1 and y_diff != -2 and y_diff != -3 and y_diff != 3:
                     direction.y = -1
-                elif y_diff > 0 and y_diff != -1 and y_diff != 2 and y_diff != 1 and y_diff != -2:
+                elif y_diff > 0 and y_diff != -1 and y_diff != 2 and y_diff != 1 and y_diff != -2 and y_diff != -3 and y_diff != 3:
                     direction.y = 1
-                elif y_diff == -1 or y_diff == 2 or y_diff == 1 or y_diff == -2 or y_diff == 0:
+                elif y_diff == -1 or y_diff == 2 or y_diff == 1 or y_diff == -2 or y_diff == 0 or y_diff == -3 or y_diff == 3:
                     direction.y = 0
         
         if distance_apple > 0:
             direction_apple = (apple_vec-enemy_vec).normalize()
         
-        else:
-            direction = pygame.math.Vector2()
+        # else:
+        #     direction = pygame.math.Vector2()
 
         return (distance,direction,distance_apple,direction_apple)
     
@@ -106,6 +106,7 @@ class Enemy(Entity):
         
         else :
             self.status = 'idle'
+            print("idle")
     
     def actions(self,player,apple):
         if self.status == 'attack_player' :

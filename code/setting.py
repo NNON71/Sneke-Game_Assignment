@@ -1,6 +1,6 @@
  #game setup
 WIDTH  = 1280
-HEIGTH = 720
+HEIGTH = 768
 FPS     = 60
 TILESIZE = 64
 
@@ -29,7 +29,7 @@ WORLD_MAP = [
 
 #snake
 enemy_data = {
-    'snake_head' : {'health':100,'damage':1,'attack_type':'stalk','speed':3,'attack_player':32,'attack_apple':32,'notice_radius':500,'apple_radius':1000}
+    'snake_head' : {'health':100,'damage':1,'speed':3,'attack_player':32,'attack_apple':32,'notice_radius':500,'apple_radius':1000}
 }
 
 item_data = {

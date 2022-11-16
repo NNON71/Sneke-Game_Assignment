@@ -18,13 +18,13 @@ class Game:
     def run(self):
         while True:
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+                if event.type == pygame.QUIT or self.level.out == True:
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_r:
-                        print("BOB")
-                    
+                    if event.key == pygame.K_ESCAPE and (self.level.statusmenu == "start" or self.level.statusmenu == "pause"):
+                        self.level.game_pause()
+  
             self.screen.fill('white')
             self.level.run()
             pygame.display.update()

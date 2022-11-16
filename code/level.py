@@ -6,11 +6,10 @@ from apple import Apple
 from debug import debug
 from enemy import Enemy
 from ui import UI
+from menu import Menu
 
 class Level:
     def __init__(self):
-        
-        self.paused = False
         #get the display surface
         self.display_surface = pygame.display.get_surface()
         #self.randomize()
@@ -24,14 +23,21 @@ class Level:
         #attack
         self.current_attack = None 
         self.attack_sprites = pygame.sprite.Group()
-        self.attackale_sprites = pygame.sprite.Group()
+        #self.attackale_sprites = pygame.sprite.Group()
         
         #object setup
         self.create_map()
                 
         #user interface
         self.ui = UI()
+        self.paused = False
+        self.out = False
+        
+        self.menu = Menu()
+        self.statusmenu = "main"
         self.count =0
+        self.pause_time =0
+        self.continute_time = 0
         
         #self.apple.score = self.ui.score_calculate
         
@@ -48,7 +54,7 @@ class Level:
                     self.player = Player((x,y),[self.visible_object],self.obstacles_object,self.trail_group,5)
                     self.apple = Apple((random.uniform(3,16)*64,random.uniform(3,10)*64),[self.visible_object],self.obstacles_object,0)
                 if col == 's':
-                    self.snake = Enemy('snake_head',(x,y),[self.visible_object,self.attackale_sprites],self.obstacles_object,self.damage_player,self.damage_apple,self.snake_trail_group)
+                    self.snake = Enemy('snake_head',(x,y),[self.visible_object],self.obstacles_object,self.damage_player,self.damage_apple,self.snake_trail_group)
                 # if col == 'sb':
                 #     self.snake_body = Enemy('snake_body',(x,y),[self.visible_object,self.attackale_sprites],self.obstacles_object,self.damage_player,self.damage_apple)   
                 
@@ -57,28 +63,90 @@ class Level:
     #     self.
         
     def run(self):
-        #self.create_apple.draw_apple()
-        self.visible_object.custom_draw(self.player)
-        self.trail_group.update()
-        self.snake_trail_group.update()
-        self.ui.display(self.player)
-        if self.paused or self.player.game_over_stats :
-            #print(self.ui.score)
+        #print(self.display_surface)
+        #print(self.menu.menustats)
+        #print(self.menu.stamp)
+        #print(self.paused)
+        #print(str('menu ')+self.menu.menustats+str(' level '+self.statusmenu))
+        #print(self.statusmenu)
+        self.player.death_check()
+        #print(self.player.game_over_stats)
+        if self.menu.menustats == "main":
+            #print("MAIN")
             self.display_surface.fill('black')
-            self.ui.game_over_screen()
-        else:
-            self.visible_object.enemy_update(self.player,self.apple)
-            #self.visible_object.enemybody_update(self.snake)
+            self.ui.main_screen()
+            self.default_setting()
+        if self.menu.menustats == "start" or self.menu.menustats == "continue" or (self.menu.menustats == "pause" and self.paused == False): 
+            self.statusmenu = "start"
+            #self.display_surface.fill('white')
+            self.visible_object.custom_draw(self.player)
+            self.trail_group.update()
+            self.snake_trail_group.update()
+            self.ui.display(self.player)
+            self.snake.enemy_update(self.player,self.apple)
+            #self.visible_object.enemy_update(self.player,self.apple)
             self.get_apple()
             self.visible_object.update()
-            self.ui.show_score(self.apple.score)
-            self.player.death_check()
+            self.ui.show_score(self.apple.score,self.menu.stamp,self.pause_time,self.continute_time)
             self.collison_tail()
+        
+        if self.menu.menustats == "scoreboard":
+            self.statusmenu = "scoreboard"
+            self.display_surface.fill('black')
+            self.ui.score_screen()
+            #print("scoreboard")
+        
+        if self.paused == True:
+            self.statusmenu = "pause"
+                
+        if self.menu.menustats == "continue":
+            self.paused = False
+        
+        if self.menu.menustats == "pause":
+            self.visible_object.custom_draw(self.player)
+            self.ui.display(self.player)
+            self.ui.show_score(self.apple.score,self.menu.stamp,self.pause_time,self.continute_time)
+            #self.visible_object.update()
+            #self.display_surface.fill('black')
+            self.ui.pause_screen()
             
-        #debug(self.player.direction)
-        #debug(self.snake.rect)
+          
+        if self.menu.menustats == "quit":
+            self.display_surface.fill('black')
+            self.out = True
+            #print("quit")
+            
+        if self.player.game_over_stats == True:
+            self.statusmenu = "over"
+        
+            #print(self.menu.menustats)
+            
+        if self.menu.menustats == "over":
+            #print("BPB")
+            self.display_surface.fill('black')
+            self.ui.game_over_screen()      
+                
+        self.menu.consolebutton(self.statusmenu)
+        #debug(self.player.rect.center)
+        #debug(self.snake.speed)
         #debug(self.player.dash)
-    
+        
+        
+    def default_setting(self):
+        #self.create_map()
+        self.player.health = 5
+        self.snake.speed = 3
+        self.count = 0
+        self.snake_trail_group.empty()
+        self.trail_group.empty()
+        self.player.kill()
+        self.player = Player((576,576),[self.visible_object],self.obstacles_object,self.trail_group,5)
+        self.snake.kill()
+        self.snake = Enemy('snake_head',(128,256),[self.visible_object],self.obstacles_object,self.damage_player,self.damage_apple,self.snake_trail_group)
+        self.statusmenu = "main"
+        self.apple.score = 0
+        self.player.game_over_stats = False
+        
     def damage_player(self,amount):
         self.player.kill()
         if self.player.vulnerable:
@@ -92,7 +160,7 @@ class Level:
             if tail.rect.colliderect(self.player.rect):
                 self.player.vulnerable = True
                 self.damage_player(1)
-    
+                
     def damage_apple(self,amount):
         self.count += 1
         print(self.count)
@@ -101,7 +169,7 @@ class Level:
             self.snake.long = 0.1
         else :
             self.snake.long -= 0.05
-        self.snake.snake_range += 100
+        #self.snake.snake_range += 100
         self.snake.cdapple = pygame.time.get_ticks()
         self.apple.health  -= amount
         self.apple.apple_check()
@@ -109,6 +177,7 @@ class Level:
             self.snake.speed += 0.1
         elif self.snake.speed > 6:
             self.snake.speed = 6
+
         self.apple = Apple((random.uniform(3,17)*64,random.uniform(3,10)*64),[self.visible_object],self.obstacles_object,self.apple.score) 
 
     def get_apple(self):
@@ -117,7 +186,7 @@ class Level:
             self.get_player_point()
         
     def get_player_point(self):
-        self.apple.score  += 150
+        self.apple.score  += 100
         #self.snake.speed -= 0.1
         if self.player.health >= 5:
             self.player.health += 0
@@ -132,7 +201,10 @@ class Level:
     
     def game_pause(self):
         self.paused = not self.paused
-           
+        if self.paused == True:
+            self.pause_time = pygame.time.get_ticks()
+        else :
+            self.continute_time = pygame.time.get_ticks()
          
 class YsortcameraGroup(pygame.sprite.Group):
     def __init__(self) :
@@ -182,10 +254,10 @@ class YsortcameraGroup(pygame.sprite.Group):
             
         #pygame.draw.rect(self.display_surface,'red',self.camera_rect,5)
         
-    def enemy_update(self,player,apple):
-        enemy_sprite = [sprite for sprite in self.sprites() if hasattr(sprite,'sprite_type') and sprite.sprite_type == 'enemy']
-        for enemy in enemy_sprite:
-            enemy.enemy_update(player,apple)
+    # def enemy_update(self,player,apple):
+    #     enemy_sprite = [sprite for sprite in self.sprites() if hasattr(sprite,'sprite_type') and sprite.sprite_type == 'enemy']
+    #     for enemy in enemy_sprite:
+    #         enemy.enemy_update(player,apple)
 
     
     # def enemybody_update(self,snake):

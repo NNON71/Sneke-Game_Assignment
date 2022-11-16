@@ -1,5 +1,6 @@
 import pygame
 from entity import Entity
+from menu import Menu
 from particle import Trail
 from setting import *
 
@@ -14,6 +15,8 @@ class Player(Entity):
         #self.rect = self.image.fill('black')
         self.rect = self.image.get_rect(center = pos)
         self.hitbox = self.rect.inflate(0,0)
+        
+        self.menu = Menu()
         
         self.dashing = False
         self.dash_time = None
@@ -78,7 +81,7 @@ class Player(Entity):
         current_time = pygame.time.get_ticks()
 
         if self.dashing == True:
-            t =Trail(self.rect.center,(200,200,200))
+            t =Trail(self.rect.center,(255,0,0))
             self.trail_group.add(t)
             if current_time - self.dash_time >= self.dash_cooldown:
                 self.dashing = False
@@ -93,7 +96,9 @@ class Player(Entity):
                 
     def death_check(self):
         if self.health <= 0:
+            #self.menu.consolebutton()
             self.game_over_stats = True
+            #self.menu.menustats = "over"
               
     def animate(self):
         if not self.vulnerable:

@@ -1,22 +1,27 @@
 import pygame
 from setting import *
+from menu import Menu  
 
 class UI:
     def __init__(self):
         
+        self.menu = Menu()
         #general
         self.display_surface = pygame.display.get_surface()
         self.font = pygame.font.Font(UI_FONT,UI_FONT_SIZE)
-        self.font_gameover = pygame.font.Font(UI_FONT,100)
-        self.font_score = pygame.font.Font(UI_FONT,60)
+        self.font_Name = pygame.font.Font(UI_FONT,80)
+        self.font_score = pygame.font.Font(UI_FONT,50)
+        self.score_text_font = pygame.font.Font(UI_FONT,70)
         
         #bar setup
-        self.health_bar_rect = pygame.Rect(30,20,HEALTH_BAR_WIDTH,BAR_HEIGHT)
+        self.health_bar_rect = pygame.Rect(100,20,HEALTH_BAR_WIDTH,BAR_HEIGHT)
         self.bar_rect = pygame.Rect(0,0,1280,60)
         
     def show_bar(self,current,max_amount,bg_rect,color):
         #draw bg
-        pygame.draw.rect(self.display_surface,UI_BG_COLOR,bg_rect)
+        pygame.draw.rect(self.display_surface,'black',self.bar_rect)
+        pygame.draw.rect(self.display_surface,'white',bg_rect)
+        pygame.draw.rect(self.display_surface,'black',bg_rect,3)
         
         #coverting stat to pixel
         ratio = current/max_amount
@@ -25,17 +30,26 @@ class UI:
         current_rect.width = current_width
         
         #drawing the bar
-        pygame.draw.rect(self.display_surface,'black',self.bar_rect)
         pygame.draw.rect(self.display_surface,color,current_rect)
-        pygame.draw.rect(self.display_surface,'white',current_rect,3)
+        pygame.draw.rect(self.display_surface,'black',current_rect,3)
  
     
     def display(self,player):
         self.show_bar(player.health,player.stats['health'],self.health_bar_rect,HEALTH_COLOR)
-    
         
-    def show_score(self,apple_score):
-        self.counting_time = pygame.time.get_ticks()
+    
+    def show_score(self,apple_score,time,pause,con):
+        self.stamee = time
+        self.pause_time = pause
+        self.con_time = con
+        self.run_time = pygame.time.get_ticks()
+        self.menu.consolebutton(self.menu.menustats)
+        #print(self.menu.stamp)
+        if self.con_time >= self.pause_time and self.menu.menustats == "start":
+            self.counting_time = self.run_time-self.stamee-(self.con_time-self.pause_time)
+        if self.counting_time < 0:
+            self.counting_time = 0
+        #print(str("UI ")+str(self.run_time)+str(" menu ")+str(self.stamee)+str(" menu continue ")+str(self.con_time)+str(" menu pause ")+str(self.pause_time)+str(" count ")+str(self.counting_time))
         self.score_calculate =  (self.counting_time*25//10000)+apple_score
         self.second_count = (self.counting_time%60000)//1000
         self.minute_count = self.counting_time//60000
@@ -56,8 +70,34 @@ class UI:
         pygame.draw.rect(self.display_surface,'Black',score_rect)
         self.display_surface.blit(score_text, score_rect)
     
+    def main_screen(self):
+        Sneke_text = self.font_Name.render(str("Sneke"),True,'white')
+        self.display_surface.blit(Sneke_text,(480,80))    
+        
+    def score_screen(self):
+        score_font = pygame.font.Font(UI_FONT,60)
+        score_text = score_font.render(str("Score board"),True,'white')
+        self.display_surface.blit(score_text,(380,80))
+    
+    def pause_screen(self):
+        pause_font = pygame.font.Font(UI_FONT,60)
+        pasue_text = pause_font.render(str("PAUSE"),True,'red')
+        pause_rect = pasue_text.get_rect(center = (640,360))
+        pygame.draw.rect(self.display_surface,'white',pause_rect)
+        self.display_surface.blit(pasue_text,pause_rect)
+    
     def game_over_screen(self):
-        text_surf =  self.font_gameover.render(str("GAME OVER"),True,'white')
-        self.display_surface.blit(text_surf,(280,150))
-        score_surd = self.font_score.render(str("SCORE : ")+str(self.score_calculate),True,'white')
-        self.display_surface.blit(score_surd,(350,360))
+        score_surd = self.score_text_font.render(str("SCORE"),True,'white')
+        self.display_surface.blit(score_surd,(520,60))
+        score_cal_sur = self.font_score.render(str(self.score_calculate),True,'white')
+        if self.score_calculate < 10 : 
+            self.display_surface.blit(score_cal_sur,(640,210))
+        if self.score_calculate < 100 and self.score_calculate >= 10 : 
+            self.display_surface.blit(score_cal_sur,(620,210))
+        if self.score_calculate < 1000 and self.score_calculate >= 100: 
+            self.display_surface.blit(score_cal_sur,(600,210))
+        if self.score_calculate < 10000 and self.score_calculate >= 1000: 
+            self.display_surface.blit(score_cal_sur,(580,210))
+        if self.score_calculate < 100000 and self.score_calculate >= 10000: 
+            self.display_surface.blit(score_cal_sur,(560,210))
+        
