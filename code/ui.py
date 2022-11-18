@@ -9,7 +9,7 @@ class UI:
         #general
         self.display_surface = pygame.display.get_surface()
         self.font = pygame.font.Font(UI_FONT,UI_FONT_SIZE)
-        self.font_Name = pygame.font.Font(UI_FONT,80)
+        self.font_Name = pygame.font.Font(UI_FONT,100)
         self.font_score = pygame.font.Font(UI_FONT,50)
         self.score_text_font = pygame.font.Font(UI_FONT,70)
         
@@ -72,32 +72,71 @@ class UI:
     
     def main_screen(self):
         Sneke_text = self.font_Name.render(str("Sneke"),True,'white')
-        self.display_surface.blit(Sneke_text,(480,80))    
+        self.display_surface.blit(Sneke_text,(440,80))    
         
     def score_screen(self):
+        with open("data.txt","r") as f :
+            data = f.readlines()
+            name = []
+            score = []
+            num = 0
+            a = ''
+            b = ''
+            for line in data:
+                a = ''
+                b = ''
+                num += 1
+                for i in line:
+                    if i.isalpha() == True:
+                        a +=  i
+                    if i.isdigit() == True:
+                        b += i
+                name.append(a)
+                score.append(b)
+                # print(name)
+                # print(score)
+            f.close()
+        x = 260
         score_font = pygame.font.Font(UI_FONT,60)
         score_text = score_font.render(str("Score board"),True,'white')
-        self.display_surface.blit(score_text,(380,80))
-    
+        self.display_surface.blit(score_text,(380,40))
+        sub_font = pygame.font.Font(UI_FONT,30)
+        bg_score = pygame.Rect(260,160,760,480)
+        pygame.draw.rect(self.display_surface,'black',bg_score)
+        name_word = sub_font.render(str("NAME"),True,'red')
+        score_word = sub_font.render(str("score"),True,'red')
+        self.display_surface.blit(name_word,(370,180))
+        self.display_surface.blit(score_word,(790,180))
+        if num > 5:
+            num = 5
+        for i in range(0,num,1):
+            name_text  = sub_font.render(str(name[i]),True,'white')
+            name_rect = name_text.get_rect(center = (420,x))
+            self.display_surface.blit(name_text,name_rect)
+            scorep_text = sub_font.render(str(score[i]),True,'white')
+            scorep_rect = scorep_text.get_rect(center = (850,x))
+            self.display_surface.blit(scorep_text,scorep_rect)
+            x += 80
+            
     def pause_screen(self):
         pause_font = pygame.font.Font(UI_FONT,60)
         pasue_text = pause_font.render(str("PAUSE"),True,'red')
         pause_rect = pasue_text.get_rect(center = (640,360))
-        pygame.draw.rect(self.display_surface,'white',pause_rect)
+        #pygame.draw.rect(self.display_surface,'white',pause_rect)
         self.display_surface.blit(pasue_text,pause_rect)
     
     def game_over_screen(self):
         score_surd = self.score_text_font.render(str("SCORE"),True,'white')
-        self.display_surface.blit(score_surd,(520,60))
+        self.display_surface.blit(score_surd,(500,60))
         score_cal_sur = self.font_score.render(str(self.score_calculate),True,'white')
         if self.score_calculate < 10 : 
-            self.display_surface.blit(score_cal_sur,(640,210))
-        if self.score_calculate < 100 and self.score_calculate >= 10 : 
             self.display_surface.blit(score_cal_sur,(620,210))
-        if self.score_calculate < 1000 and self.score_calculate >= 100: 
+        if self.score_calculate < 100 and self.score_calculate >= 10 : 
             self.display_surface.blit(score_cal_sur,(600,210))
-        if self.score_calculate < 10000 and self.score_calculate >= 1000: 
+        if self.score_calculate < 1000 and self.score_calculate >= 100: 
             self.display_surface.blit(score_cal_sur,(580,210))
-        if self.score_calculate < 100000 and self.score_calculate >= 10000: 
+        if self.score_calculate < 10000 and self.score_calculate >= 1000: 
             self.display_surface.blit(score_cal_sur,(560,210))
+        if self.score_calculate < 100000 and self.score_calculate >= 10000: 
+            self.display_surface.blit(score_cal_sur,(540,210))
         

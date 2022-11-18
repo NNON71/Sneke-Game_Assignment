@@ -13,7 +13,7 @@ class Enemy(Entity):
         
         #graphic setup
         # self.import_grapgics(monster_name)
-        self.image = pygame.image.load('graphic/snakeaaaa.png').convert_alpha()
+        self.image = pygame.image.load('graphic/snake.png').convert_alpha()
         self.status = 'idle'
         
         #move
@@ -103,11 +103,9 @@ class Enemy(Entity):
             
         elif distance > distance_apple :#distance_apple <= self.apple_radius :
             self.status = 'move_to_apple'    
-        
         else :
-            self.status = 'idle'
-            print("idle")
-    
+            self.status = 'move_to_apple'
+        
     def actions(self,player,apple):
         if self.status == 'attack_player' :
             #print('attack')
@@ -142,7 +140,6 @@ class Enemy(Entity):
             current_time = pygame.time.get_ticks()
             if current_time - self.cdapple >= self.snake_range:
                 self.can_attack = True
-                #self.snake_trail_group.empty()
        
     def update(self):
         # self.input()

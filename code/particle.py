@@ -7,16 +7,16 @@ class Trail(pygame.sprite.Sprite):
         self.display_surface = pygame.display.get_surface()
 
         self.x, self.y = pos
-        #self.y += 10
-        self.dx = random.randint(0,50) / 10 - 1
-        self.dy = -2
-        self.size = 10#random.randint(4,10)
+        self.y += 10
+        self.dx = random.randint(0,32) / 20
+        self.dy = -0.2
+        self.size = random.randint(4,6)
 
         self.rect = pygame.draw.circle(self.display_surface, self.color, (self.x, self.y), self.size)
 
     def update(self):
-        #self.x -= self.dx
-        #self.y -= self.dy
+        self.x -= self.dx
+        self.y -= self.dy
         self.size -= 0.1
 
         if self.size <= 0:
@@ -34,7 +34,7 @@ class SnakeTail(pygame.sprite.Sprite):
         self.size = 16
         self.long = rangeee
 
-        self.rect = pygame.draw.circle(self.display_surface,(2,120,2), (self.x, self.y), self.size)
+        self.rect = pygame.draw.circle(self.display_surface,(0,0,255), (self.x, self.y), self.size)
         #self.rect = pygame.draw.rect(self.display_surface,'blue',(self.x,self.y,self.size,self.size))
     
     def update(self):
@@ -44,4 +44,4 @@ class SnakeTail(pygame.sprite.Sprite):
             self.kill()
         
         #self.rect = pygame.draw.rect(self.display_surface,'blue',(self.x,self.y,self.size,self.size))
-        self.rect = pygame.draw.circle(self.display_surface,(2,120,2), (self.x, self.y), self.size)
+        self.rect = pygame.draw.circle(self.display_surface,(0,0,255), (self.x, self.y), self.size)

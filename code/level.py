@@ -5,6 +5,7 @@ from player import Player
 from apple import Apple
 from debug import debug
 from enemy import Enemy
+from save import Save
 from ui import UI
 from menu import Menu
 
@@ -39,9 +40,22 @@ class Level:
         self.pause_time =0
         self.continute_time = 0
         
+        self.name_input = ''
+        self.save_score = False
         #self.apple.score = self.ui.score_calculate
-        
         self.gameover = pygame.font.SysFont(UI_FONT,100)
+        
+        self.bg_main = pygame.image.load('graphic/background/bg_mainaa.png')
+        self.bg_score = pygame.image.load('graphic/background/bg_score.png')
+        self.bg_start = pygame.image.load('graphic/background/bg_start.png')
+        self.bg_over = pygame.image.load('graphic/background/bg_over.png')
+        
+        self.damage_sound = pygame.mixer.Sound('audio/damageaa.wav')
+        self.damage_sound.set_volume(0.4)
+        
+        self.apple_sound = pygame.mixer.Sound('audio/apple.wav')
+        self.apple_sound.set_volume(0.4)
+        
         
     def create_map(self):
         for row_index,row in enumerate(WORLD_MAP): #นับแถวเก็บไว้ในrow_index
@@ -71,13 +85,23 @@ class Level:
         #print(self.statusmenu)
         self.player.death_check()
         #print(self.player.game_over_stats)
+        if self.save_score == True:
+            # if self.name_input == '':
+            #     self.name_input = 'unknow'
+            self.save = Save(self.name_input,self.ui.score)
+            self.save.write()
+            self.save.sort()
+            self.menu.menustats = "main"
+            
         if self.menu.menustats == "main":
             #print("MAIN")
-            self.display_surface.fill('black')
+            self.display_surface.blit(self.bg_main,(0,0))
             self.ui.main_screen()
             self.default_setting()
+            
         if self.menu.menustats == "start" or self.menu.menustats == "continue" or (self.menu.menustats == "pause" and self.paused == False): 
             self.statusmenu = "start"
+            self.display_surface.blit(self.bg_start,(0,0))
             #self.display_surface.fill('white')
             self.visible_object.custom_draw(self.player)
             self.trail_group.update()
@@ -92,7 +116,8 @@ class Level:
         
         if self.menu.menustats == "scoreboard":
             self.statusmenu = "scoreboard"
-            self.display_surface.fill('black')
+            self.display_surface.blit(self.bg_score,(0,0))
+            #self.display_surface.fill('black')
             self.ui.score_screen()
             #print("scoreboard")
         
@@ -103,6 +128,7 @@ class Level:
             self.paused = False
         
         if self.menu.menustats == "pause":
+            self.display_surface.blit(self.bg_start,(0,0))
             self.visible_object.custom_draw(self.player)
             self.ui.display(self.player)
             self.ui.show_score(self.apple.score,self.menu.stamp,self.pause_time,self.continute_time)
@@ -117,15 +143,21 @@ class Level:
             #print("quit")
             
         if self.player.game_over_stats == True:
-            self.statusmenu = "over"
-        
+            self.statusmenu = "over"    
             #print(self.menu.menustats)
             
         if self.menu.menustats == "over":
-            #print("BPB")
-            self.display_surface.fill('black')
-            self.ui.game_over_screen()      
-                
+            self.name_font = pygame.font.Font(UI_FONT,30)
+            self.nameinput_font = pygame.font.Font(UI_FONT,40)
+            x = 640
+            self.display_surface.blit(self.bg_over,(0,0))
+            self.ui.game_over_screen()
+            enter_surf = self.name_font.render("PLEASE ENTER YOUR NAME",True,'white')
+            text_surf = self.nameinput_font.render(self.name_input,True,'white')
+            x -= len(self.name_input)*18
+            self.display_surface.blit(enter_surf,(380,360))
+            self.display_surface.blit(text_surf,(x,460))
+            
         self.menu.consolebutton(self.statusmenu)
         #debug(self.player.rect.center)
         #debug(self.snake.speed)
@@ -133,7 +165,8 @@ class Level:
         
         
     def default_setting(self):
-        #self.create_map()
+        self.name_input = ''
+        self.save_score = False
         self.player.health = 5
         self.snake.speed = 3
         self.count = 0
@@ -148,6 +181,7 @@ class Level:
         self.player.game_over_stats = False
         
     def damage_player(self,amount):
+        self.damage_sound.play()
         self.player.kill()
         if self.player.vulnerable:
             self.player.health -= amount
@@ -162,8 +196,9 @@ class Level:
                 self.damage_player(1)
                 
     def damage_apple(self,amount):
+        snake_level = 1
         self.count += 1
-        print(self.count)
+        #print(self.count)
         self.snake.eatapple = True
         if self.snake.long < 0.2 :
             self.snake.long = 0.1
@@ -173,20 +208,32 @@ class Level:
         self.snake.cdapple = pygame.time.get_ticks()
         self.apple.health  -= amount
         self.apple.apple_check()
-        if self.snake.speed < 6:
+        if self.snake.speed >= 6 and self.count < 50:
+            snake_level = 2 
+        elif self.count >= 50 or self.ui.minute_count > 4:
+            snake_level = 3
+            
+        if snake_level == 1:
             self.snake.speed += 0.1
-        elif self.snake.speed > 6:
+            #print("level1")
+        elif snake_level == 2:
             self.snake.speed = 6
-
+            #print("level2")
+        elif snake_level == 3:
+            self.snake.speed += 0.1
+            #print("level3")
+            if self.snake.speed > 7:
+                self.snake.speed = 7
         self.apple = Apple((random.uniform(3,17)*64,random.uniform(3,10)*64),[self.visible_object],self.obstacles_object,self.apple.score) 
 
     def get_apple(self):
         if self.player.rect.colliderect(self.apple):
+            self.apple_sound.play()
             self.apple.kill()
             self.get_player_point()
         
     def get_player_point(self):
-        self.apple.score  += 100
+        self.apple.score  += 20
         #self.snake.speed -= 0.1
         if self.player.health >= 5:
             self.player.health += 0

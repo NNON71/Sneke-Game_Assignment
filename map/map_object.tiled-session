@@ -8,20 +8,27 @@
         "."
     ],
     "fileStates": {
+        "": {
+            "scaleInDock": 1
+        },
         "TX Tileset Grass.tsx": {
             "scaleInDock": 1,
             "scaleInEditor": 1
         },
         "map.tmx": {
             "scale": 0.75,
-            "selectedLayer": 0,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 780,
-                "y": 484
+                "x": 728,
+                "y": 476
             }
+        },
+        "tileset-grassland-grass.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
         }
     },
-    "last.imagePath": "C:/Users/user/Downloads/Pixel Art Top Down - Basic/Texture",
+    "last.imagePath": "C:/Users/user/Desktop/Grasslands - Free/Grasslands - Free",
     "map.fixedSize": true,
     "map.height": 15,
     "map.lastUsedFormat": "tmx",
@@ -30,11 +37,13 @@
     "map.width": 25,
     "openFiles": [
         "TX Tileset Grass.tsx",
-        "map.tmx"
+        "map.tmx",
+        "tileset-grassland-grass.tsx"
     ],
     "project": "map_object.tiled-project",
     "recentFiles": [
         "TX Tileset Grass.tsx",
+        "tileset-grassland-grass.tsx",
         "map.tmx"
     ],
     "tileset.lastUsedFormat": "tsx",

@@ -5,12 +5,13 @@ from button import Button
 class Menu:
     def __init__(self) :
         self.display_surface = pygame.display.get_surface()
+        self.font = pygame.font.Font(UI_FONT,40)
          #button 
-        self.stat_img = pygame.image.load('graphic/Button.png').convert_alpha()
-        self.scoreboard_img = pygame.image.load("graphic/Button.png").convert_alpha()
-        self.continute_img = pygame.image.load("graphic/Button.png").convert_alpha()
-        self.quit_img = pygame.image.load("graphic/Button.png").convert_alpha()
-        self.back_img = pygame.image.load('graphic/Button.png').convert_alpha()
+        self.stat_img = pygame.image.load('graphic/button/buttone.png').convert_alpha()
+        self.scoreboard_img = pygame.image.load("graphic/button/buttone.png").convert_alpha()
+        #self.continute_img = pygame.image.load("graphic/button/start_button.png").convert_alpha()
+        self.quit_img = pygame.image.load("graphic/button/buttone.png").convert_alpha()
+        self.back_img = pygame.image.load('graphic/button/buttone.png').convert_alpha()
                
         self.menustats = "main"
         
@@ -19,11 +20,10 @@ class Menu:
         self.continute_time = 0
                         
     def consolebutton(self,menustatus):
-        self.start_button = Button(600, 250, self.stat_img, 0.25,0.25)
-        self.scoreboard_button = Button(600,400,self.scoreboard_img,0.25,0.25)
-        self.continute_button = Button(700,400,self.continute_img,0.25,0.25)
-        self.quit_button = Button(600, 550, self.quit_img,0.25,0.25)
-        self.back_button = Button(1000, 600, self.back_img, 0.25,0.25)
+        self.start_button = Button(130,310, self.stat_img, 0.80,0.25)
+        self.scoreboard_button = Button(130,455,self.scoreboard_img,1.5,0.25)
+        self.quit_button = Button(130, 600, self.quit_img,0.68,0.25)
+        self.back_button = Button(560, 675, self.back_img, 0.7,0.25)
         
         self.menustats = menustatus
         
@@ -38,10 +38,18 @@ class Menu:
                 
             if self.quit_button.draw(self.display_surface):
                 self.menustats = "quit"
+            start_text = self.font.render("START",True,'white')
+            self.display_surface.blit(start_text,(150,310)) 
+            score_text = self.font.render("SCOREBOARD",True,'white')
+            self.display_surface.blit(score_text,(150,460))   
+            exit_text = self.font.render("EXIT",True,'white')
+            self.display_surface.blit(exit_text,(150,600))   
 
         if self.menustats == "scoreboard":
             if self.back_button.draw(self.display_surface):
                 self.menustats = "main"
+            back_text = self.font.render("BACK",True,'white')
+            self.display_surface.blit(back_text,(580,680))   
         
         # if self.menustats == "pause":
         #     # self.pause_time = pygame.time.get_ticks()
@@ -51,11 +59,6 @@ class Menu:
         # if self.menustats == "continue":
         #     self.continute_time = pygame.time.get_ticks()
                 
-        if self.menustats == "over" :
-            #self.menustats = "over"
-            if self.back_button.draw(self.display_surface):
-                 self.menustats = "main"
-        
         #     if self.quit_button.draw(self.display_surface):
         #         self.menustats = "main"
     
